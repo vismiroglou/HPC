@@ -1,6 +1,7 @@
 \documentclass{article}
+\usepackage{graphicx}
 \begin{document}
-\section*{Lecture 1 - Computer Architectures}
+\section*{Lecture 1-Computer Architectures}
 \indent Modern computers follow the Von Neumann architecture with \textit{fetch, execute, store} control flow. 
 More specficially, the computer contains
 \begin{itemize}
@@ -17,5 +18,57 @@ The control unit manages the four basic operations as follows:
     \item Execute: carries out the requested action
     \item Store: saves the result to a register or memory
 \end{itemize}
-The register is a type of memory that is very fast and very close to the cpu but very limited in space. It is used to save intermediate calculations. 
+The arithmetic/logic unit will perform logic/mathematical operations. The processor also comes with an internal clock that dictates when instructions start.
+The register is a type of memory that is very fast and very close to the cpu but very limited in space. It is used to save intermediate calculations.
+
+\paragraph*{\textbf{Instruction Level Parallelism:}}is the approach in which CPUs operate on multiple instructions simultaneously, which are said to be `in flight'. 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{graphics/Screenshot 2024-02-08 113342.png}
+\end{figure}
+\begin{itemize}
+    \item Multiple Floating Point Units (supporting parallel execution)
+    \item Fused Multiply-Add: x ← ax + b in same time as addition or multiplication.
+    \item Multiple-issue: instructions that are independent can be started at the same time.
+    \item Pipelining: arithmetic units can deal with multiple operations in various stages of completion.
+    \item Branch prediction and speculative execution: A compiler can "guess" whether a conditional instruction will evaluate to true, and exectue those instructions accordingly.
+    \item Out-of-order execution: instructions can be rearranged if they are not dependent on each other, and if the resulting execution will be more efficient.
+    \item Prefetching: data can be speculatively requested before any instruction needing it is actually
+    encountered.
+\end{itemize}
+\subsection*{Memory Aspects}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=8cm]{graphics/Screenshot 2024-02-08 115031.png}
+\end{figure}
+There are two quantities to check:
+\begin{itemize}
+    \item Latency: Delay from the request item in memory until arrival.
+    \item Bandwidth: The rate at which data arrives at its destination, after the initial latency is overcome. Measured in bytes per second or per clock cycle.
+\end{itemize}
+
+\paragraph*{} Vectorial processing is when you use a single operation to add multiple FPs for example. It only works if the data you stored in memory is contiguous.
+
+
+\paragraph*{Memory layout}
+\begin{itemize}
+    \item Contiguous: Where elements are neighbours. Easy prefetching; efficient memory transfer especially for vector units.
+    \item Noncontiguous: Where elements are fragmented in memory. Prefetching is challenging and less efficient wide memory bus utilization; less efficient transfer. 
+\end{itemize}
+\begin{figure}[h]
+    \includegraphics[width=\linewidth]{graphics/Screenshot 2024-02-08 115653.png}
+\end{figure}
+
+If memory allows, it is often an advantage to store both versions.
+\paragraph*{Cache}
+Keep often used data close for easy retrieval. When the CPU needs some specific data it will first check the L1, L2, L3 cache to see if it was recently used. If the data is not found it's a `miss'. There are three types of misses
+\begin{itemize}
+    \item Compolsary: On first access. Unavoidable
+    \item Capacity: Too much data that is often used filling the cache. Solution is to partition the problem into chunks that can be contained in cache.
+    \item Conflict: Multiple items are mapped to same cache location and hence overwritten.
+\end{itemize}
+
+Something about cache lines and mapping 
+
+
 \end{document}
