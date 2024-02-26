@@ -21,7 +21,7 @@ def plot_mandelbrot(img):
     plt.xlabel("Re[c]")
     plt.ylabel("Im[c]")
     plt.title("M(c)")
-    plt.savefig("figures/mandelbrot.png")
+    plt.savefig("graphics/mandelbrot.png")
     plt.show()
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
