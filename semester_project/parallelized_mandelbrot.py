@@ -2,6 +2,15 @@ import numpy as np
 import multiprocessing as mp
 from IPython import get_ipython
 
+def plot_mandelbrot(img):
+    from matplotlib import pyplot as plt
+    figure = plt.figure(figsize=(5,5), dpi=500)
+    plt.imshow(img, cmap='hot', extent=[re_floor, re_ceiling, im_floor, im_ceiling])
+    plt.xlabel("Re[c]")
+    plt.ylabel("Im[c]")
+    plt.title("M(c)")
+    plt.show()
+
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
     re = np.linspace(re_floor, re_ceiling, pre)
     im = np.linspace(im_floor, im_ceiling, pim)
@@ -9,7 +18,7 @@ def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
     c = X + Y * 1j
     return c
 
-def mandelbrot(c, I):
+def mandelbrot_vector(c, I):
     z = np.zeros_like(c)
     img = np.zeros((c.shape[0], c.shape[1]))
     for i in range(I):
@@ -21,7 +30,7 @@ def mandelbrot(c, I):
 def parallel_grid(num_workers, c):
     subgrids = np.array_split(c, num_workers)
     pool = mp.Pool(num_workers)
-    results = [pool.apply_async(mandelbrot, (subgrid, I, )) for subgrid in subgrids]
+    results = [pool.apply_async(mandelbrot_vector, (subgrid, I, )) for subgrid in subgrids]
     pool.close()
     pool.join()
     results = [result.get() for result in results]
@@ -47,10 +56,4 @@ if __name__ == '__main__':
 
     ipython.run_line_magic("timeit", "parallel_grid(num_workers,c)")
 
-    from matplotlib import pyplot as plt
-    figure = plt.figure(figsize=(5,5), dpi=500)
-    plt.imshow(img, cmap='hot', extent=[re_floor, re_ceiling, im_floor, im_ceiling])
-    plt.xlabel("Re[c]")
-    plt.ylabel("Im[c]")
-    plt.title("M(c)")
-    plt.show()
+  
