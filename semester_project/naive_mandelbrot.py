@@ -13,8 +13,8 @@ from IPython import get_ipython
 def plot_mandelbrot(img):
     from matplotlib import pyplot as plt
     import os
-    if not os.path.isdir('figures/'):
-        os.mkdir('figures/')
+    if not os.path.isdir('graphics/'):
+        os.mkdir('graphics/')
 
     figure = plt.figure(figsize=(5,5))
     plt.imshow(img, cmap='hot', extent=[re_floor, re_ceiling, im_floor, im_ceiling])
