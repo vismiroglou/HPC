@@ -76,14 +76,27 @@ def mandelbrot_numba(re, im, I):
     return(img)
 
 if __name__ == '__main__':
-    pre = 5000
-    pim = 5000
-    re_floor = -2
-    re_ceiling = 1
-    im_floor = -1.5
-    im_ceiling = 1.5
-    num_workers = 6
-    I = 100
+    from argparse import ArgumentParser
+    ap = ArgumentParser(prog= 'Loop Mandelbrot',
+                        description= 'Nested loop implementation for the mandelbrot recursive task. Includes JIT and multiprocessing')
+    ap.add_argument('--pre', type=int, default=5000, help='Amount of real numbers in the grid')
+    ap.add_argument('--pim', type=int, default=5000, help='Amount of imaginary numbers in the grid')
+    ap.add_argument('--re_floor', type=float, default=-2, help='Lower bound of real component')
+    ap.add_argument('--re_ceiling', type=float, default=1, help='Higher bound of real component')
+    ap.add_argument('--im_floor', type=float, default=-1.5, help='Lower bound of imaginary component')
+    ap.add_argument('--im_ceiling', type=float, default=1.5, help='Higher bound of imaginary component')
+    ap.add_argument('--num_iter', type=int, default=100, help='Number of iterations')
+    ap.add_argument('--num_workers', type=int, default=6, help='Number of parallel processes to run / number of cores')
+    args = ap.parse_args()
+
+    pre = args.pre
+    pim = args.pim
+    re_floor = args.re_floor
+    re_ceiling = args.re_ceiling
+    im_floor = args.im_floor
+    im_ceiling = args.im_ceiling
+    num_workers = args.num_workers
+    I = args.num_iter
 
     ipython = get_ipython()
 
@@ -91,8 +104,8 @@ if __name__ == '__main__':
     img = mandelbrot_numba(re, im, I)
     plot_mandelbrot(img)
 
-    print('Processing time for baseline model:')
-    ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
+    # print('Processing time for baseline model:')
+    # ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
     print('Processing time for just-in-time compilation:')
     ipython.run_line_magic("timeit", "mandelbrot_numba(re, im, I)")
     print('Processing time for the parallelized baseline:')
