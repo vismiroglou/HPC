@@ -12,11 +12,16 @@ from IPython import get_ipython
 
 def plot_mandelbrot(img):
     from matplotlib import pyplot as plt
-    figure = plt.figure(figsize=(5,5), dpi=500)
+    import os
+    if not os.path.isdir('figures/'):
+        os.mkdir('figures/')
+
+    figure = plt.figure(figsize=(5,5))
     plt.imshow(img, cmap='hot', extent=[re_floor, re_ceiling, im_floor, im_ceiling])
     plt.xlabel("Re[c]")
     plt.ylabel("Im[c]")
     plt.title("M(c)")
+    plt.savefig("figures/mandelbrot.png")
     plt.show()
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
@@ -83,10 +88,10 @@ if __name__ == '__main__':
     ipython = get_ipython()
 
     re, im = make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim)
-    img = parallelize_grid_numba(re, im, I, num_workers)
+    img = mandelbrot_numba(re, im, I)
     plot_mandelbrot(img)
 
-    # ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
-    # ipython.run_line_magic("timeit", "mandelbrot_numba(re, im, I)")
-    # ipython.run_line_magic("timeit", "parallelize_grid(re, im, I, num_workers)")
-    # ipython.run_line_magic("timeit", "parallelize_grid_numba(re, im, I, num_workers)")
+    ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
+    ipython.run_line_magic("timeit", "mandelbrot_numba(re, im, I)")
+    ipython.run_line_magic("timeit", "parallelize_grid(re, im, I, num_workers)")
+    ipython.run_line_magic("timeit", "parallelize_grid_numba(re, im, I, num_workers)")
