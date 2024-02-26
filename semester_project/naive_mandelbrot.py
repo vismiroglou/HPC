@@ -46,7 +46,7 @@ def parallelize_grid_numba(re, im, I, num_workers):
     return img
 
 def mandelbrot(re, im, I):
-    img = np.zeros((len(re), len(im)))
+    img = np.zeros((len(im), len(re)))
     for r in range(len(re)):
         for i in range(len(im)):
             c = re[r] + im[i] * 1j
@@ -54,7 +54,7 @@ def mandelbrot(re, im, I):
             for iter in range(I):
                 if np.abs(z) <= 2:
                     z = z * z + c
-                    img[i, r] += 1
+                    img[r, i] += 1
     return(img)
 
 @jit
