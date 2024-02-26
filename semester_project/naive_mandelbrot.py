@@ -91,7 +91,11 @@ if __name__ == '__main__':
     img = mandelbrot_numba(re, im, I)
     plot_mandelbrot(img)
 
+    print('Processing time for baseline model:')
     ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
+    print('Processing time for just-in-time compilation:')
     ipython.run_line_magic("timeit", "mandelbrot_numba(re, im, I)")
+    print('Processing time for the parallelized baseline:')
     ipython.run_line_magic("timeit", "parallelize_grid(re, im, I, num_workers)")
+    print('Processing time for parallelized with just-in-time:')
     ipython.run_line_magic("timeit", "parallelize_grid_numba(re, im, I, num_workers)")
