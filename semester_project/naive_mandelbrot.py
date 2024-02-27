@@ -12,16 +12,16 @@ import time
 from matplotlib import pyplot as plt
 import os
 
-def plot_mandelbrot(img):
+def plot_mandelbrot(img, args):
     if not os.path.isdir('graphics/'):
         os.mkdir('graphics/')
 
     figure = plt.figure(figsize=(5,5))
-    plt.imshow(img, cmap='hot', extent=[re_floor, re_ceiling, im_floor, im_ceiling])
+    plt.imshow(img, cmap='hot', extent=[args.re_floor, args.re_ceiling, args.im_floor, args.im_ceiling])
     plt.xlabel("Re[c]")
     plt.ylabel("Im[c]")
     plt.title("M(c)")
-    plt.savefig("graphics/loop_mandelbrot.png")
+    plt.savefig(f"graphics/{args.name}.png")
     plt.show()
 
 def plot_time_results(algorithms, times, args):
@@ -32,7 +32,7 @@ def plot_time_results(algorithms, times, args):
     plt.xlabel("Algorithm")
     plt.ylabel("Time[s]")
     plt.title(f"Processing time per algorithm on a {args.pre}x{args.pim} grid.")
-    plt.savefig("graphics/time_loop_model.png")
+    plt.savefig(f"graphics/time_{args.name}.png")
     plt.show()
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
@@ -99,6 +99,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     ap = ArgumentParser(prog= 'Loop Mandelbrot',
                         description= 'Nested loop implementation for the mandelbrot recursive task. Includes JIT and multiprocessing')
+    ap.add_argument('--name', type=str, default='loop_mandelbrot', help='Experiment name')
     ap.add_argument('--pre', type=int, default=5000, help='Amount of real numbers in the grid')
     ap.add_argument('--pim', type=int, default=5000, help='Amount of imaginary numbers in the grid')
     ap.add_argument('--re_floor', type=float, default=-2, help='Lower bound of real component')
