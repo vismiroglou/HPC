@@ -22,7 +22,7 @@ def mandelbrot_vector(c, I):
     proc_time = time.time() - start
     return img, proc_time
 
-# @jit
+# @jit Does not work yet.
 # def mandelbrot_vector_numba(c, I):
 #     with objmode(start='f8'):
 #         start = time.time()
