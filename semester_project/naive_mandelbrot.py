@@ -37,7 +37,7 @@ def parallelize_grid(re, im, I, num_workers):
     pool.close()
     pool.join()
     results = [result.get() for result in results]
-    result = np.concatenate(results)
+    result = np.concatenate(results, axis=1)
     return result
 
 def parallelize_grid_numba(re, im, I, num_workers):
