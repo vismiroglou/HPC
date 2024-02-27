@@ -8,7 +8,7 @@ Nested loop implementation of the mandelbrot iterative task. Includes:
 import numpy as np
 from numba import jit
 import multiprocessing as mp
-from IPython import get_ipython
+import time
 
 def plot_mandelbrot(img):
     from matplotlib import pyplot as plt
@@ -98,17 +98,20 @@ if __name__ == '__main__':
     num_workers = args.num_workers
     I = args.num_iter
 
-    ipython = get_ipython()
-
     re, im = make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim)
     img = mandelbrot_numba(re, im, I)
     plot_mandelbrot(img)
 
-    # print('Processing time for baseline model:')
-    # ipython.run_line_magic("timeit", "mandelbrot(re, im, I)")
-    print('Processing time for just-in-time compilation:')
-    ipython.run_line_magic("timeit", "mandelbrot_numba(re, im, I)")
-    print('Processing time for the parallelized baseline:')
-    ipython.run_line_magic("timeit", "parallelize_grid(re, im, I, num_workers)")
-    print('Processing time for parallelized with just-in-time:')
-    ipython.run_line_magic("timeit", "parallelize_grid_numba(re, im, I, num_workers)")
+    
+    start = time.time()
+    img = mandelbrot(re, im, I)
+    print(f'Processing time for baseline loop model: {time.time()-start}[s]')
+    start = time.time()
+    img = mandelbrot_numba(re, im, I)
+    print(f'Processing time for just in time loop model: {time.time()-start}[s]')
+    start = time.time()
+    img =  parallelize_grid(re, im, I, num_workers)
+    print(f'Processing time for parallelized loop model: {time.time()-start}[s]')
+    start = time.time()
+    img =  parallelize_grid_numba(re, im, I, num_workers)
+    print(f'Processing time for parallelized just in time loop model: {time.time()-start}[s]')
