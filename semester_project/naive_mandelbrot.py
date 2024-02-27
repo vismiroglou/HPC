@@ -33,7 +33,7 @@ def parallelize_grid(re, im, I, num_workers):
     pool = mp.Pool(num_workers)
     reals = np.array_split(re, num_workers)
     imaginaries = np.array_split(im, num_workers)
-    results = [pool.apply_async(mandelbrot, (real, imaginary, I, )) for real, imaginary in zip(reals, imaginaries)]
+    results = [pool.apply_async(mandelbrot, (real, im, I, )) for real in reals]
     pool.close()
     pool.join()
     results = [result.get() for result in results]
@@ -59,7 +59,7 @@ def mandelbrot(re, im, I):
             for iter in range(I):
                 if np.abs(z) <= 2:
                     z = z * z + c
-                    img[r, i] += 1
+                    img[i,r ] += 1
     return(img)
 
 @jit
