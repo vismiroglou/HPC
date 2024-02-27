@@ -6,13 +6,13 @@ Nested loop implementation of the mandelbrot iterative task. Includes:
 '''
 
 import numpy as np
-from numba import jit
+from numba import jit, objmode
 import multiprocessing as mp
 import time
+from matplotlib import pyplot as plt
+import os
 
 def plot_mandelbrot(img):
-    from matplotlib import pyplot as plt
-    import os
     if not os.path.isdir('graphics/'):
         os.mkdir('graphics/')
 
@@ -21,7 +21,18 @@ def plot_mandelbrot(img):
     plt.xlabel("Re[c]")
     plt.ylabel("Im[c]")
     plt.title("M(c)")
-    plt.savefig("graphics/mandelbrot.png")
+    plt.savefig("graphics/loop_mandelbrot.png")
+    plt.show()
+
+def plot_time_results(algorithms, times, args):
+    if not os.path.isdir('graphics/'):
+        os.mkdir('graphics/')
+    figure = plt.figure(figsize=(5,5))
+    plt.plot(algorithms, times)
+    plt.xlabel("Algorithm")
+    plt.ylabel("Time[s]")
+    plt.title(f"Processing time per algorithm on a {args.pre}x{args.pim} grid.")
+    plt.savefig("graphics/time_loop_model.png")
     plt.show()
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
@@ -30,27 +41,31 @@ def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
     return re, im
 
 def parallelize_grid(re, im, I, num_workers):
+    start = time.time()
     pool = mp.Pool(num_workers)
     reals = np.array_split(re, num_workers)
-    imaginaries = np.array_split(im, num_workers)
     results = [pool.apply_async(mandelbrot, (real, im, I, )) for real in reals]
     pool.close()
     pool.join()
-    results = [result.get() for result in results]
-    result = np.concatenate(results, axis=1)
-    return result
+    results = [result.get()[0] for result in results]
+    img = np.concatenate(results, axis=1)
+    proc_time = time.time() - start
+    return img, proc_time
 
 def parallelize_grid_numba(re, im, I, num_workers):
+    start = time.time()
     pool = mp.Pool(num_workers)
     reals = np.array_split(re, num_workers)
     results = [pool.apply_async(mandelbrot_numba, (real, im, I, )) for real in reals]
     pool.close()
     pool.join()
-    results = [result.get() for result in results]
+    results = [result.get()[0] for result in results]
     img = np.concatenate(results, axis=1)
-    return img
+    proc_time = time.time()-start
+    return img, proc_time
 
 def mandelbrot(re, im, I):
+    start = time.time()
     img = np.zeros((len(im), len(re)))
     for r in range(len(re)):
         for i in range(len(im)):
@@ -60,10 +75,13 @@ def mandelbrot(re, im, I):
                 if np.abs(z) <= 2:
                     z = z * z + c
                     img[i,r ] += 1
-    return(img)
+    proc_time = time.time() - start
+    return img, proc_time
 
 @jit
 def mandelbrot_numba(re, im, I):
+    with objmode(start = 'f8'):
+        start = time.time()
     img = np.zeros((len(im), len(re)))
     for i in range(len(im)):
         for r in range(len(re)):
@@ -73,7 +91,9 @@ def mandelbrot_numba(re, im, I):
                 if np.abs(z) <= 2:
                     z = z * z + c
                     img[i, r] += 1
-    return(img)
+    with objmode(proc_time = 'f8'):
+        proc_time = time.time() - start
+    return img, proc_time
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -99,19 +119,18 @@ if __name__ == '__main__':
     I = args.num_iter
 
     re, im = make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim)
-    img = mandelbrot_numba(re, im, I)
-    plot_mandelbrot(img)
 
+    models = {"Baseline": mandelbrot(re, im, I),
+              "JIT": mandelbrot_numba(re, im, I ),
+              "Parallelized": parallelize_grid(re, im, I, num_workers),
+              "Parallelized + JIT": parallelize_grid_numba(re, im, I, num_workers)
+            }
+    times = []   
+
+    for model in models:
+        img, proc_time = models[model]
+        print(f'Processing time for {model}: {proc_time}[s]')
+        times.append(proc_time)
     
-    start = time.time()
-    img = mandelbrot(re, im, I)
-    print(f'Processing time for baseline loop model: {time.time()-start}[s]')
-    start = time.time()
-    img = mandelbrot_numba(re, im, I)
-    print(f'Processing time for just in time loop model: {time.time()-start}[s]')
-    start = time.time()
-    img =  parallelize_grid(re, im, I, num_workers)
-    print(f'Processing time for parallelized loop model: {time.time()-start}[s]')
-    start = time.time()
-    img =  parallelize_grid_numba(re, im, I, num_workers)
-    print(f'Processing time for parallelized just in time loop model: {time.time()-start}[s]')
+    plot_mandelbrot(img)
+    plot_time_results(models.keys(), times, args)
