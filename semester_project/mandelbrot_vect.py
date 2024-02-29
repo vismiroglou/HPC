@@ -1,7 +1,7 @@
 import numpy as np
 import multiprocessing as mp
 from numba import jit, objmode
-from semester_project.mandelbrot_loop import plot_mandelbrot, plot_time_results
+from mandelbrot_loop import plot_mandelbrot, plot_time_results
 import time
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
