@@ -13,16 +13,16 @@ than the available processes.
 '''
 
 import multiprocessing as mp
-import random
 import numpy as np
 import time
 from matplotlib import pyplot as plt
+from dask.distributed import Client, wait
 
-def icircle(L):
+def icircle(L, dummy):
     M = 0
     for _ in range(L):
-        x = random.random()
-        y = random.random()
+        x = np.random.random()
+        y = np.random.random()
         if (x**2 + y**2) < 1:
             M += 1
     return(M)
@@ -31,7 +31,7 @@ def parpi(num_workers, L, N):
     #Create number of workers
     pool = mp.Pool(num_workers)
     # Get the result as a list of mp.async_results
-    results = [pool.apply_async(icircle, (L,)) for i in range(N)]
+    results = [pool.apply_async(icircle, (L, 1, )) for i in range(N)]
     # Close and join the processors
     pool.close()
     pool.join()
@@ -39,9 +39,9 @@ def parpi(num_workers, L, N):
     points_in_circle = np.sum([result.get() for result in results])
     # Calculate pi approximation as P = pi/4 where P is the ratio of points in the circle over points outside.
     mcpi = 4 * points_in_circle / (N*L)
-    return(mcpi) 
+    return mcpi
 
-def measure(L, N, familyname = 'num_workers'):
+def measure(L, N, function, familyname):
     '''
     Measures the speed of the parallel processing as a function of the number of available processes.
     The available processes start for 1 (no parallel processing) and go up to maximum available cores.
@@ -49,7 +49,7 @@ def measure(L, N, familyname = 'num_workers'):
     times = []
     for num_workers in range(1, mp.cpu_count()+1):
         start = time.time()
-        parpi(num_workers, L, N)
+        function(num_workers, L, N)
         times.append(time.time()-start)
 
     #Plot
@@ -57,7 +57,7 @@ def measure(L, N, familyname = 'num_workers'):
     plt.xticks(range(1, mp.cpu_count()+1))
     plt.xlabel('Number of workers')
     plt.ylabel('Time (s)')
-    plt.title('Processing time as a function of parallel processes with the maximum being equal to the number of cores')
+    plt.title('Processing time as a function of number of workers')
     plt.savefig(f'plots/{familyname}_speedup.pdf')
     plt.show()
 
@@ -85,9 +85,19 @@ def measureN(k, Nmax, familyname='num_realizations'):
     plt.show()
     plt.close()
     
+def parallel_pi(P, L, N):
+    client = Client(n_workers=P)
+    counts = client.map(icircle, [L]*N, range(N))
+    total = client.submit(sum, counts)
+    mcpi = 4 * total.result() / (N*L)
+    client.close()
+
+    return mcpi
 
 if __name__ == '__main__':
     L = 10**6
     N = 18
-    measure(L, N)
-    measureN(L*N, 18)
+    num_workers = 6
+    measure(L, N, parpi, 'multicore')
+    measure(L, N, parallel_pi, 'distributed')
+    # measureN(L*N, 18)
