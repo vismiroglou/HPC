@@ -6,6 +6,5 @@ config = Namespace(name = None,
                    re_ceiling = 1,
                    im_floor = -1.5,
                    im_ceiling = 1.5,
-                   num_workers = 6,
                    I = 100
                     )
