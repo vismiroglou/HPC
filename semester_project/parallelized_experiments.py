@@ -5,7 +5,7 @@ to compare performance. The naive loop-version is used as it gets the most out o
 
 import numpy as np
 import multiprocessing as mp
-from mandelbrot_loop import make_grid, mandelbrot_numba, plot_mandelbrot
+from mandelbrot_loop import make_grid, mandelbrot, plot_mandelbrot
 from mandelbrot_vect import make_grid as make_grid_vect, mandelbrot_vector
 import time
 
@@ -20,7 +20,7 @@ def parallelize_grid(config, num_workers, model):
                            config.pre, 
                            config.pim)
         reals = np.array_split(re, num_workers)
-        results = [pool.apply_async(mandelbrot_numba, (real, im, config.I, )) for real in reals]
+        results = [pool.apply_async(mandelbrot, (real, im, config.I, )) for real in reals]
         pool.close()
         pool.join()
         results = [result.get()[0] for result in results]
@@ -62,5 +62,18 @@ if __name__ == '__main__':
     num_workers = 6
     img, proc_time = parallelize_grid(config, num_workers, 'loop')
     plot_mandelbrot(img, config)
+
+    #Checking the performance of different number of workers
+    times = []
+    for num_workers in range(1, 13):
+        _, proc_time = parallelize_grid(config, num_workers, 'loop')
+        times.append(proc_time)
+
+    from matplotlib import pyplot as plt
+    plt.plot(range(1, 13), times)
+    plt.xlabel('Num_workers')
+    plt.ylabel('Proc_time')
+    plt.show()
+
 
     
