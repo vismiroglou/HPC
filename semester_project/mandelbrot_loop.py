@@ -5,12 +5,13 @@ Nested loop implementation of the mandelbrot iterative task. Includes:
 '''
 import numpy as np
 from numba import jit, objmode
-import multiprocessing as mp
 import time
 from matplotlib import pyplot as plt
 import os
+from tqdm import tqdm
 
 def plot_mandelbrot(img, args):
+    # Plots the mandelbrot figure
     if not os.path.isdir('graphics/'):
         os.mkdir('graphics/')
 
@@ -22,17 +23,6 @@ def plot_mandelbrot(img, args):
     plt.savefig(f"graphics/{args.name}.png")
     plt.show()
 
-def plot_time_results(algorithms, times, args):
-    if not os.path.isdir('graphics/'):
-        os.mkdir('graphics/')
-    figure = plt.figure(figsize=(5,5))
-    plt.plot(algorithms, times)
-    plt.xlabel("Algorithm")
-    plt.ylabel("Time[s]")
-    plt.title(f"Processing time per algorithm on a {args.pre}x{args.pim} grid.")
-    plt.savefig(f"graphics/time_{args.name}.png")
-    plt.show()
-
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
     re = np.linspace(re_floor, re_ceiling, pre)
     im = np.linspace(im_floor, im_ceiling, pim)
@@ -41,7 +31,7 @@ def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
 def mandelbrot(re, im, I):
     start = time.time()
     img = np.zeros((len(im), len(re)))
-    for r in range(len(re)):
+    for r in tqdm(range(len(re))):
         for i in range(len(im)):
             c = re[r] + im[i] * 1j
             z = 0 + 0 * 1j
@@ -77,12 +67,9 @@ if __name__ == '__main__':
 
     models = {"Baseline": mandelbrot(re, im, config.I),
               "JIT": mandelbrot_numba(re, im, config.I )}
-    times = []   
 
     for model in models:
         img, proc_time = models[model]
         print(f'Processing time for {model}: {proc_time}[s]')
-        times.append(proc_time)
     
     plot_mandelbrot(img, config)
-    plot_time_results(models.keys(), times, config)
