@@ -43,32 +43,17 @@ def parallelize_grid(config, num_workers, model):
     proc_time = time.time() - start
     return img, proc_time
 
-def parallelize_grid_numba(re, im, I, num_workers):
-    start = time.time()
-    pool = mp.Pool(num_workers)
-    reals = np.array_split(re, num_workers)
-    results = [pool.apply_async(mandelbrot_numba, (real, im, I, )) for real in reals]
-    pool.close()
-    pool.join()
-    results = [result.get()[0] for result in results]
-    img = np.concatenate(results, axis=1)
-    proc_time = time.time()-start
-    return img, proc_time
-
 if __name__ == '__main__':
     from config import config
     config.name = 'parallelize_experiments'
 
-    num_workers = 6
-    img, proc_time = parallelize_grid(config, num_workers, 'loop')
-    plot_mandelbrot(img, config)
-
     #Checking the performance of different number of workers
     times = []
     for num_workers in range(1, 13):
-        _, proc_time = parallelize_grid(config, num_workers, 'loop')
+        _, proc_time = parallelize_grid(config, num_workers, 'vect')
         times.append(proc_time)
 
+    print(times)
     from matplotlib import pyplot as plt
     plt.plot(range(1, 13), times)
     plt.xlabel('Num_workers')
