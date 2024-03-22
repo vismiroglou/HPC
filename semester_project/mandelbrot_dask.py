@@ -22,8 +22,8 @@ if __name__ == '__main__':
     num_workers = 6
     I = 100
 
-    # client = Client(n_workers=num_workers)
-    client = Client('10.92.1.192:8786')
+    client = Client(n_workers=num_workers)
+    # client = Client('10.92.1.192:8786')
 
     # Creating the grid as a numpy array
     c = make_grid(config.re_floor, 

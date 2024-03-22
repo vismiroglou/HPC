@@ -1,7 +1,7 @@
 from argparse import Namespace
 config = Namespace(name = None,
-                   pre = 2000,
-                   pim = 2000,
+                   pre = 5000,
+                   pim = 5000,
                    re_floor = -2,
                    re_ceiling = 1,
                    im_floor = -1.5,
