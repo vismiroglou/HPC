@@ -3,24 +3,23 @@ import multiprocessing as mp
 from numba import jit, objmode
 from mandelbrot_loop import plot_mandelbrot
 import time
+from matplotlib import pyplot as plt
 
-def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
-    re = np.linspace(re_floor, re_ceiling, pre)
-    im = np.linspace(im_floor, im_ceiling, pim)
+def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim, dtype):
+    re = np.linspace(re_floor, re_ceiling, pre).astype(dtype)
+    im = np.linspace(im_floor, im_ceiling, pim).astype(dtype)
     X, Y = np.meshgrid(re, im)
     c = X + Y * 1j
     return c
 
 def mandelbrot_vector(c, I):
-    start = time.time()
     z = np.zeros_like(c)
     img = np.zeros((c.shape[0], c.shape[1]))
     for i in range(I):
         mask = np.abs(z) <= 2
         z[mask] = z[mask] * z[mask] + c[mask]
         img += mask.astype(int)
-    proc_time = time.time() - start
-    return img, proc_time
+    return img
 
 @jit
 def mandelbrot_vector_numba(c, I):
@@ -54,17 +53,21 @@ def parallel_grid(num_workers, c, I):
 
 if __name__ == '__main__':
     from config import config
-    config.name = 'vect_mandelbrot'
+    config.name = 'vect_mandelbrot_precision_tests'
 
-    c = make_grid(config.re_floor, config.re_ceiling, config.im_floor, config.im_ceiling, config.pre, config.pim)
+    data_types = [np.float16, np.float32, np.float64]
+    times = []
+    for data_type in data_types:
+        c = make_grid(config.re_floor, config.re_ceiling, config.im_floor, config.im_ceiling, config.pre, config.pim, data_type)
+        start = time.time()
+        img = mandelbrot_vector(c, config.I)
+        proc_time = time.time()-start
+        times.append(proc_time)
+        print(f'Time for {data_type}: {proc_time}')
+        # Plotting the acutal mandelbrot to see differences if any
+        plot_mandelbrot(img, config)
 
-    models = {"Vect": mandelbrot_vector(c, config.I),
-              "Vect + JIT": mandelbrot_vector_numba(c, config.I)}
-    
-    for model in models:
-        img, proc_time = models[model]
-        print(f'Processing time for {model}: {proc_time}[s]')
-
-    plot_mandelbrot(img, config)
+    plt.plot([str(data_type) for data_type in data_types], times)
+    plt.show()
 
   
