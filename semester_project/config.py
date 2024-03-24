@@ -1,5 +1,6 @@
 from argparse import Namespace
-config = Namespace(name = None,
+config = Namespace(name = 'early_stopping_2',
+                   title = 'Processing time of different chunk shapes with early stopping',
                    pre = 5000,
                    pim = 5000,
                    re_floor = -2,

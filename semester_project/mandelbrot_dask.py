@@ -10,6 +10,9 @@ def mandelbrot(c, I):
     img = np.zeros((c.shape[0], c.shape[1]))
     for i in range(I):
         mask = np.abs(z) <= 2
+        # Early stopping optimization
+        if not mask.any():
+            break
         z[mask] = z[mask] * z[mask] + c[mask]
         img += mask.astype(int)
     return img
@@ -48,8 +51,10 @@ if __name__ == '__main__':
     print(f'Starting dask distributed version for multiple chunk sizes:')
     
     c = da.from_array(c)
-    for x in [2, 3, 6, 9, 12, 15, 18]:
-        chunks = (config.pre//x, config.pim)
+    chunk_sizes_1 = [(config.pre//x, config.pim) for x in [2, 3, 6, 9, 12, 15, 18]]
+    chunk_sizes_2 = [(1000, 1000), (800,800), (600,600), (400,400), (200,200), (100,100)]
+    for chunk_size in chunk_sizes_2:
+        chunks = chunk_size
         print(f'Chunk size: {chunks}')
         start = time.time()
         img = c.rechunk(chunks=chunks).map_blocks(lambda x: mandelbrot(x, I)).compute()
@@ -62,9 +67,10 @@ if __name__ == '__main__':
     client.close()
     fig = plt.figure(figsize=(7,5))
     plt.xticks(rotation=30, fontsize=8, ha='right')
-    plt.title('1-D Chunk size comparison.')
+    plt.ylabel('time[s]')
+    plt.title(config.title)
     plt.plot(points[0], points[1])
-    plt.savefig('handin_2/1d_chunk_size_comparison.png')
+    plt.savefig(f'handin_2/{config.name}')
     plt.show()
 
     
