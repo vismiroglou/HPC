@@ -1,7 +1,7 @@
 import numpy as np
 import multiprocessing as mp
 from numba import jit, objmode
-from mandelbrot_loop import plot_mandelbrot
+from utils import plot_mandelbrot
 import time
 from matplotlib import pyplot as plt
 

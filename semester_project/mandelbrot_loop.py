@@ -9,19 +9,9 @@ import time
 from matplotlib import pyplot as plt
 import os
 from tqdm import tqdm
+from utils import plot_mandelbrot
 
-def plot_mandelbrot(img, args):
-    # Plots the mandelbrot figure
-    if not os.path.isdir('graphics/'):
-        os.mkdir('graphics/')
 
-    figure = plt.figure(figsize=(5,5))
-    plt.imshow(img, cmap='hot', extent=[args.re_floor, args.re_ceiling, args.im_floor, args.im_ceiling])
-    plt.xlabel("Re[c]")
-    plt.ylabel("Im[c]")
-    plt.title("M(c)")
-    plt.savefig(f"graphics/{args.name}.png")
-    plt.show()
 
 def make_grid(re_floor, re_ceiling, im_floor, im_ceiling, pre, pim):
     re = np.linspace(re_floor, re_ceiling, pre)
