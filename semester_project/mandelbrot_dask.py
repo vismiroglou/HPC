@@ -34,7 +34,8 @@ if __name__ == '__main__':
                         config.im_floor, 
                         config.im_ceiling, 
                         config.pre, 
-                        config.pim)
+                        config.pim,
+                        np.float32)
     
     points = [[],[]]
 
@@ -53,7 +54,8 @@ if __name__ == '__main__':
     c = da.from_array(c)
     chunk_sizes_1 = [(config.pre//x, config.pim) for x in [2, 3, 6, 9, 12, 15, 18]]
     chunk_sizes_2 = [(1000, 1000), (800,800), (600,600), (400,400), (200,200), (100,100)]
-    for chunk_size in chunk_sizes_2:
+    chunk_sizes_3 = [(200, 200), (100,100), (80,80), (50,50), (20,20), (10,10)]
+    for chunk_size in chunk_sizes_3:
         chunks = chunk_size
         print(f'Chunk size: {chunks}')
         start = time.time()
